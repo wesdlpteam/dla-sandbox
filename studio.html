@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DLA Studio — Wesley College</title>
+<!-- Modular Phase 1: extracted CSS and JS into external classic scripts. Behaviour unchanged from DLA_Studio_v3_with_patch9.html. -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d0d0d'/%3E%3Crect width='32' height='32' rx='8' fill='none' stroke='%23D4A017' stroke-width='1.5' opacity='0.4'/%3E%3Ctext x='16' y='23' font-family='system-ui,sans-serif' font-size='18' font-weight='900' fill='%23D4A017' text-anchor='middle' letter-spacing='-1'%3EW%3C/text%3E%3Ccircle cx='25' cy='7' r='4' fill='%23C5E84A'/%3E%3C/svg%3E">
+<!-- sandbox: Google sign-in removed -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="css/studio.css">
+<script>/* ===== DLA sandbox guard ===== */
+/* DLA sandbox guard. Installed before any page code runs.
+   Nothing may leave this device. Cross-origin fetch and every sendBeacon are
+   swallowed and resolved as an empty failed response, so existing page code
+   takes its normal error path without a visible break. */
+(function () {
+  var w = typeof window !== 'undefined' ? window : this;
+  var realFetch = w.fetch ? w.fetch.bind(w) : null;
+  var origin = (w.location && w.location.origin) || '';
+
+  function isSameOrigin(url) {
+    var s = String(url == null ? '' : url);
+    if (!s) return true;
+    if (s.indexOf('//') === 0) return false;                 // protocol-relative
+    if (/^[a-z][a-z0-9+.-]*:/i.test(s)) {                    // absolute, any scheme
+      return !!origin && s.indexOf(origin + '/') === 0;
+    }
+    return true;                                             // relative path
+  }
+
+  function blockedResponse() {
+    return Promise.resolve({
+      ok: false,
+      status: 0,
+      statusText: 'blocked by sandbox guard',
+      text: function () { return Promise.resolve(''); },
+      json: function () { return Promise.reject(new Error('sandbox: request blocked')); }
+    });
+  }
+
+  w.fetch = function (input, init) {
+    var url = input && input.url ? input.url : input;
+    if (!isSameOrigin(url)) {
+      if (w.console && w.console.info) w.console.info('[sandbox] blocked outbound request:', String(url));
+      return blockedResponse();
+    }
+    if (!realFetch) return blockedResponse();
+    return realFetch(input, init);
+  };
+
+  if (typeof navigator !== 'undefined') {
+    navigator.sendBeacon = function () { return true; };
+  }
+
+  w.__sandboxGuardInstalled = true;
+})();
+
+</script>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div id="global-progress"><div id="global-progress-bar"></div></div>
+
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div id="logo">DLA Studio</div>
+  <div class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard',this)">
+    <span>◈</span><span class="nav-label"> Dashboard</span>
+  </div>
+  <div class="nav-item" data-tab="browse" onclick="switchTab('browse',this)">
+    <span>⊞</span><span class="nav-label"> Browse</span>
+  </div>
+  <div class="nav-item" data-tab="audit" onclick="switchTab('audit',this)">
+    <span>◎</span><span class="nav-label"> Audit</span>
+  </div>
+  <div class="nav-item" data-tab="tools" onclick="switchTab('tools',this)">
+    <span>⚡</span><span class="nav-label"> Bulk</span>
+  </div>
+  <div class="nav-item" data-tab="libraries" onclick="switchTab('libraries',this)">
+    <span>📚</span><span class="nav-label"> Libraries</span>
+  </div>
+  <div class="nav-item" data-tab="live" onclick="switchTab('live',this)">
+    <span>◉</span><span class="nav-label"> Analytics</span>
+  </div>
+
+  <div id="sidebar-footer">
+    <div style="width:38px;height:38px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;flex-shrink:0">
+      <span style="font-size:22px;font-weight:900;color:#111;font-family:system-ui,sans-serif;letter-spacing:-1px">W</span>
+    </div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text)">Wesley College</div>
+    <div style="font-size:9px;color:var(--dim);margin-bottom:6px">Melbourne</div>
+    <div id="dla-version-label" style="font-size:9px;color:var(--mint)">● DLA Studio v5.23</div>
+    <div id="sidebar-user-email" style="font-size:10px;color:var(--dim);margin-top:4px;word-break:break-all"></div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn-sm dla-footer-back" href="index.html" title="Back to the teacher-facing DLA">← DLA</a>
+      <button class="btn-sm" onclick="downloadJSON()">↓ JSON</button>
+      <button class="btn-sm" onclick="showKeyboardHelp()" title="Keyboard shortcuts">⌨</button>
+      <button class="btn-sm" onclick="forceLatestVersion()" title="Force-load the latest version (use this if new changes aren't showing)" style="color:var(--lime)">↻ latest</button>
+      <button class="btn-sm" onclick="clearSession()" title="Clear session & sign out" style="color:#FF8080">⏏</button>
+      <button class="btn-sm" onclick="showBackendScreen()" title="Backend / AI settings">⚙ backend</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- SETUP -->
+  <div id="screen-setup" class="screen active">
+
+    <!-- Left setup sidebar -->
+    <div class="setup-sidebar">
+      <div class="dla-wordmark">DLA</div>
+      <div class="setup-nav-item active">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+        API Setup
+      </div>
+      <div class="setup-nav-item" style="opacity:.4">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="setup-version" id="setup-version-label">v5.19</div>
+      <div class="wesley-brand">
+        <div class="wesley-w">W</div>
+        <div class="wesley-text">Wesley<br>College</div>
+      </div>
+    </div>
+
+    <!-- Center card -->
+    <div class="setup-center">
+      <div class="setup-card">
+        <div class="setup-card-title">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#00e676" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          DLA Studio: Welcome &amp; Setup
+        </div>
+        <div class="setup-card-sub">AI now runs through the secured Apps Script backend. No OpenAI key is stored in this browser.</div>
+
+        <div style="padding:14px 16px;background:rgba(197,232,74,0.08);border:1px solid rgba(197,232,74,0.25);border-radius:12px;margin-bottom:18px">
+          <div style="font-size:12px;font-weight:800;color:var(--lime);margin-bottom:5px">✓ Backend AI enabled</div>
+          <div style="font-size:12px;color:var(--dim);line-height:1.6">OpenAI and GitHub tokens are read from Apps Script Script Properties. Studio only needs your Wesley Google Drive access.</div>
+        </div>
+
+        <button class="setup-confirm" onclick="showScreen('load')">continue →</button>
+        <div style="padding:10px 12px;background:rgba(96,184,240,0.08);border:1px solid rgba(96,184,240,0.25);border-radius:10px;margin-top:12px;font-size:11px;color:var(--dim);line-height:1.6;text-align:left">
+          🔒 Production mode: Studio only loads the canonical Drive <code style="color:var(--blue)">data.json</code>. Local JSON import and paste loading are disabled to prevent accidental overwrites.
+        </div>
+        <p style="font-size:10px;color:var(--dim);margin-top:14px;text-align:center;line-height:1.6;font-family:monospace">
+          Optional: set <b>DLA_SHARED_SECRET</b> in GAS and save the matching token in this browser via ⚙ backend.
+        </p>
+      </div>
+    </div>
+
+    <!-- Right info panel -->
+    <div class="setup-right">
+      <div class="setup-welcome-label">Welcome to</div>
+      <div class="setup-headline">Your <span>AI-powered</span><br>assistant for<br>IB PYP learning plans</div>
+      <div class="setup-tagline">Your advanced platform for generating innovative technology experiences linked directly to your units of inquiry.</div>
+      <div class="status-cards">
+        <div class="status-card">
+          <span class="status-key">AI Engine</span>
+          <span class="status-val" id="ai-model-label">AI via GAS</span>
+          <span><span class="status-dot"></span></span>
+        </div>
+        <div class="status-card">
+          <span class="status-key">Processing Mode</span>
+          <span class="status-val">Per-suggestion feedback</span>
+          <span><span class="status-dot"></span></span>
+        </div>
+        <div class="status-card">
+          <span class="status-key">Platform</span>
+          <span class="status-val">Wesley College DLA</span>
+          <span><span class="status-dot"></span></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LOAD -->
+  <div id="screen-load" class="screen">
+    <div class="screen-inner">
+      <div class="card" style="text-align:center">
+        <span class="label">Load data.json</span>
+        <p style="font-size:13px;color:var(--dim);margin-bottom:20px;line-height:1.6">
+          Connect Google Drive to load your <code style="background:#1a1a1a;padding:2px 6px;border-radius:4px;font-size:11px">data.json</code> file.
+        </p>
+        <button class="btn-pri full" id="btn-drive" onclick="loadFromDrive()">↑ Load from Google Drive</button>
+        <div style="font-size:11px;color:var(--dim);margin-top:12px;line-height:1.6">Local file and paste loading are disabled in production. Use Drive as the single source of truth.</div>
+        <div id="load-err" style="display:none;margin-top:14px;font-size:12px;color:#f87171;padding:10px;background:#450a0a;border-radius:6px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASTE DISABLED IN PRODUCTION -->
+  <div id="screen-paste" class="screen">
+    <div class="screen-inner">
+      <div class="card">
+        <span class="label">Local import disabled</span>
+        <p style="font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:14px">For data safety, Studio can only load the canonical Drive data.json. This prevents pasted or local JSON from accidentally overwriting the live library.</p>
+        <button class="btn-pri" onclick="showScreen('load')">Back to Drive load</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="app-content">
+    <div id="status-bar"></div>
+
+    <!-- DASHBOARD -->
+    <div id="panel-dashboard" class="panel active">
+      <div class="page-title">Dashboard</div>
+      <div class="page-sub" id="db-sub"></div>
+      <div id="uoi-pending-banner"></div>
+      <div class="stat-grid" id="stat-cards"></div>
+      <div class="card">
+        <span class="label">Issues</span>
+        <div id="fix-incomplete-bar" style="margin-bottom:14px"></div>
+        <div id="issues-list"></div>
+      </div>
+      <div class="card" style="margin-top:8px">
+        <span class="label">Kinder year groups</span>
+        <p style="font-size:13px;color:var(--dim);margin:8px 0 14px;line-height:1.6">
+          One-time setup: create the empty 3YO &amp; 4YO kinder units (all six themes) for Elsternwick and St Kilda Road so kinder teachers can submit their Central Idea &amp; Lines of Inquiry. Safe to click more than once.
+        </p>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <button class="btn-pri" id="btn-seed-kinder" onclick="seedKinderYearGroups()">Create kinder year groups</button>
+          <span id="seed-kinder-status" style="font-size:13px;font-weight:600"></span>
+        </div>
+      </div>
+      <div class="card" style="margin-top:8px">
+        <span class="label">Add to Queue</span>
+        <p style="font-size:13px;color:var(--dim);margin-bottom:16px;line-height:1.6">
+          Submit a new unit to the auditor. The Apps Script engine picks it up within 10 minutes, finds the matching planner PDF on Drive, and fills in 5 AI-generated suggestions automatically.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 2fr;gap:10px;margin-bottom:12px">
+          <div>
+            <div style="font-size:11px;color:var(--dim);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">Campus</div>
+            <select id="q-campus" class="inp" style="margin-bottom:0">
+              <option value="">Select…</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--dim);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">Year Level</div>
+            <select id="q-year" class="inp" style="margin-bottom:0">
+              <option value="">Select…</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--dim);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">Unit Theme</div>
+            <input id="q-theme" class="inp" placeholder="e.g. How We Express Ourselves" style="margin-bottom:0">
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <button class="btn-pri" id="btn-add-queue" onclick="addToGASQueue()">Add to Queue →</button>
+          <span id="q-status" style="font-size:13px;font-weight:600"></span>
+        </div>
+        <div style="margin-top:14px;padding:12px 16px;background:var(--card2);border-radius:8px;border-left:3px solid var(--gold)">
+          <div style="font-size:11px;color:var(--gold);font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">Planner naming convention</div>
+          <div style="font-size:12px;color:var(--dim);line-height:1.6;font-family:monospace">2026 - [Year Level] UOI Planners ([Campus Code]).pdf<br>
+          <span style="color:#888">e.g. 2026 - Year 4 UOI Planners (GW).pdf</span><br>
+          <span style="color:#888">Campus codes: EL = Elsternwick · GW = Glen Waverley · STK = St Kilda</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BROWSE -->
+    <div id="panel-browse" class="panel">
+      <div class="page-title">Browse Library</div>
+      <div class="page-sub">All entries across campuses and year levels.</div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+        <select id="f-campus" class="inp" style="width:auto" onchange="renderBrowse()"><option value="">All campuses</option></select>
+        <select id="f-year" class="inp" style="width:auto" onchange="renderBrowse()"><option value="">All year levels</option></select>
+        <input id="f-search" class="inp" placeholder="Search themes or tools..." oninput="renderBrowse()" style="flex:1;min-width:160px">
+        <select id="f-tool" class="inp" style="width:auto;min-width:160px" onchange="renderBrowse()">
+          <option value="">All tools</option>
+        </select>
+        <span id="browse-count" style="font-size:11px;color:var(--dim);align-self:center"></span>
+      </div>
+      <div id="browse-list"></div>
+    </div>
+
+    <!-- AUDIT -->
+    <div id="panel-audit" class="panel">
+      <div class="page-title">Audit</div>
+      <div class="page-sub">Analyse tool usage and chat with AI to make bulk changes across the library.</div>
+      <div id="audit-campus-debug" style="font-size:11px;color:var(--dim);margin-bottom:12px;padding:8px 12px;background:var(--card2);border-radius:6px;border:1px solid var(--border)"></div>
+      <div class="view-tabs">
+        <button class="view-tab active" data-view="analytics" onclick="setAuditView(this)">Analytics</button>
+        
+      </div>
+
+      <!-- Analytics -->
+      <div id="audit-analytics">
+        <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
+          <button class="view-tab active" data-av="tools" onclick="setAnalyticsView(this)">By tool</button>
+          <button class="view-tab" data-av="campus" onclick="setAnalyticsView(this)">By campus</button>
+          <button class="view-tab" data-av="year" onclick="setAnalyticsView(this)">By year</button>
+        </div>
+        <div id="year-campus-filter" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+        <div id="audit-chart"></div>
+      </div>
+
+      <!-- Chat -->
+      
+    </div>
+
+    <!-- BULK TOOLS -->
+    <div id="panel-tools" class="panel">
+      <div class="page-title">Bulk Tools</div>
+      <div class="page-sub">Chat with the built-in AI to make changes across your entire library. Manage your tool inventory, run playbooks, and roll back with snapshots.</div>
+
+      <!-- Bulk AI Edit — Chatbot Interface (moved to TOP) -->
+      <div class="card" style="margin-bottom:14px;padding:0;overflow:hidden">
+        <div style="padding:20px 24px 12px">
+          <span class="label">Bulk AI Edit</span>
+          <p style="font-size:13px;color:var(--dim);margin-bottom:0;line-height:1.6">Chat with the built-in AI to make bulk changes. Describe what you want — the AI will ask clarifying questions before proposing changes.</p>
+        </div>
+        <div id="bulk-chat-messages" style="height:380px;overflow-y:auto;padding:14px 20px;background:var(--bg);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+          <div id="bulk-chat-welcome" class="chat-msg model">
+            <div class="chat-bubble">👋 Hi! Analysing your library…</div>
+          </div>
+        </div>
+        <div id="bulk-reasoning" style="display:none;padding:10px 20px;background:var(--card2);border-top:1px solid var(--border);max-height:180px;overflow-y:auto"></div>
+        <div style="display:flex;gap:10px;padding:14px 20px;background:var(--card);align-items:center">
+          <button class="btn-sm" id="btn-bulk-reset" onclick="bulkChatReset()" style="padding:8px 10px;flex-shrink:0;white-space:nowrap" title="Clear this conversation and start a brand-new request">🆕 New</button>
+          <button class="btn-sm" id="btn-bulk-voice" onclick="toggleBulkVoice()" style="padding:8px 10px;flex-shrink:0" title="Speak your request (uses browser speech recognition)">🎤</button>
+          <input id="bulk-chat-input" class="inp" placeholder="Describe the change you want to make…" style="flex:1;margin-bottom:0;font-size:13px" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();bulkChatSend()}">
+          <button class="btn-pri" onclick="bulkChatSend()" id="btn-bulk-chat-send" style="padding:12px 20px;white-space:nowrap">Send →</button>
+        </div>
+        <div id="bulk-ai-progress" style="display:none;padding:12px 20px;background:var(--card2);border-top:1px solid var(--border)">
+          <div style="font-size:13px;color:var(--lime);font-weight:600;margin-bottom:8px" id="bulk-ai-label">Analysing entries…</div>
+          <div style="height:5px;background:var(--card);border-radius:3px"><div id="bulk-ai-bar" style="height:100%;border-radius:3px;background:var(--lime);width:0%;transition:width .4s"></div></div>
+        </div>
+      </div>
+
+      <!-- Realism & Age Audit -->
+      <div class="card" id="realism-audit-card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap">
+          <span class="label" style="margin:0">🧪 Realism & age audit</span>
+          <div style="flex:1"></div>
+          <button class="btn-sm" id="btn-full-realism-audit" onclick="runFullRealismAudit()" style="color:var(--lime);border-color:var(--lime)">Scan all suggestions</button>
+          <button class="btn-sm btn-realism-fix-all" onclick="draftAllRealismFixes('all')" style="color:var(--gold);border-color:var(--gold)">✨ Draft fixes for all flagged</button>
+        </div>
+        <p style="font-size:12px;color:var(--dim);margin-bottom:12px;line-height:1.6">Flags suggestions that may be unrealistic, too vague for classroom use, banned, duplicated, or not age-appropriate. Nothing changes unless a DLP team member drafts a replacement and approves it.</p>
+        <div id="realism-audit-result"></div>
+      </div>
+
+      <!-- Tool Inventory -->
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <span class="label" style="margin:0">🧰 tool inventory</span>
+          <div style="flex:1"></div>
+          <span id="inv-count" style="font-size:11px;color:var(--dim);font-weight:700"></span>
+        </div>
+        <p style="font-size:12px;color:var(--dim);margin-bottom:14px">Control exactly which tools the AI can suggest. Changes sync with <code style="font-size:11px;color:var(--mint)">libraries.json</code>.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+              <span style="font-size:12px;font-weight:700;color:var(--lime)">✓ WHITELIST</span>
+              <span id="inv-whitelist-count" style="font-size:10px;color:var(--dim);font-weight:600"></span>
+            </div>
+            <div style="font-size:11px;color:var(--dim);margin-bottom:8px;line-height:1.5">Only these tools will be suggested. Leave empty to allow all approved tools.</div>
+            <div style="display:grid;grid-template-columns:minmax(170px,1fr) 105px 105px auto;gap:6px;margin-bottom:8px;align-items:center">
+              <input id="inv-whitelist-input" class="inp" placeholder="e.g. Sphero BOLT" style="margin-bottom:0;font-size:12px;padding:6px 10px" onkeydown="if(event.key==='Enter'){event.preventDefault();invAddTool('approved')}">
+              <select id="inv-whitelist-min" class="inp" title="Minimum year level" style="margin-bottom:0;font-size:12px;padding:6px 8px">
+                <option value="-2" selected>3 Year Old Kinder</option><option value="-1">4 Year Old Kinder</option><option value="0">Prep</option><option value="1">Year 1</option><option value="2">Year 2</option><option value="3">Year 3</option><option value="4">Year 4</option><option value="5">Year 5</option><option value="6">Year 6</option>
+              </select>
+              <select id="inv-whitelist-max" class="inp" title="Maximum year level" style="margin-bottom:0;font-size:12px;padding:6px 8px">
+                <option value="-2">3 Year Old Kinder</option><option value="-1">4 Year Old Kinder</option><option value="0">Prep</option><option value="1">Year 1</option><option value="2">Year 2</option><option value="3">Year 3</option><option value="4">Year 4</option><option value="5">Year 5</option><option value="6" selected>Year 6</option>
+              </select>
+              <button id="inv-whitelist-add" data-inv-add="approved" type="button" class="btn-sm" onclick="invAddTool('approved')" style="color:var(--lime);border-color:var(--lime);padding:6px 12px">+ Add</button>
+            </div>
+            <div style="font-size:10px;color:var(--dim);margin-bottom:8px;line-height:1.5">Set the year-level range for each whitelisted tool. The AI will only suggest it inside that range.</div>
+            <div id="inv-whitelist-pills" style="display:flex;flex-direction:column;gap:6px;min-height:32px"></div>
+          </div>
+
+          <!-- Banned editing box hidden 2026-06-01: the whitelist is the single source of
+               truth. The banned safety net (active block on tools like ClassVR + the dashboard
+               flag) still runs behind the scenes; this only removes the box from the curator
+               UI. The #inv-banned-pills element is kept (hidden) on purpose — renderToolInventory
+               bails out if it's missing, which would also blank the whitelist. To bring the box
+               back, delete the inline display:none below. -->
+          <div style="display:none" data-banned-card="hidden">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+              <span style="font-size:12px;font-weight:700;color:#FF8080">⛔ BANNED</span>
+              <span id="inv-banned-count" style="font-size:10px;color:var(--dim);font-weight:600"></span>
+            </div>
+            <div style="font-size:11px;color:var(--dim);margin-bottom:8px;line-height:1.5">Tools Wesley no longer has or doesn't want suggested. AI will never propose these.</div>
+            <div style="display:flex;gap:6px;margin-bottom:8px">
+              <input id="inv-banned-input" class="inp" placeholder="e.g. ClassVR" style="flex:1;margin-bottom:0;font-size:12px;padding:6px 10px" onkeydown="if(event.key==='Enter'){event.preventDefault();invAddTool('banned')}">
+              <button id="inv-banned-add" data-inv-add="banned" type="button" class="btn-sm" onclick="invAddTool('banned')" style="color:#FF8080;border-color:#FF8080;padding:6px 12px">+ Ban</button>
+            </div>
+            <div id="inv-banned-pills" style="display:flex;flex-wrap:wrap;gap:4px;min-height:32px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Snapshots & Safety -->
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <span class="label" style="margin:0">📸 snapshots & undo</span>
+          <div style="flex:1"></div>
+          <button class="btn-sm" onclick="createManualSnapshot()" style="color:var(--lime);border-color:var(--lime)">+ Save snapshot now</button>
+        </div>
+        <p style="font-size:12px;color:var(--dim);margin-bottom:14px">Every Bulk AI Edit creates a snapshot automatically. Restore any snapshot to roll back. Stored locally in your browser (max 20).</p>
+        <div id="snapshots-list"></div>
+      </div>
+
+      <!-- Playbooks -->
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <span class="label" style="margin:0">📖 playbooks</span>
+          <div style="flex:1"></div>
+          <button class="btn-sm" onclick="savePlaybookFromChat()" style="color:var(--gold);border-color:var(--gold)">+ Save current as playbook</button>
+        </div>
+        <p style="font-size:12px;color:var(--dim);margin-bottom:14px">Common requests saved for re-use. Click a playbook to auto-fill the chatbot and run it.</p>
+        <div id="playbooks-list"></div>
+      </div>
+
+      <!-- Run Surgeon -->
+      <div class="card" style="margin-bottom:14px">
+        <span class="label">Run Surgeon</span>
+        <p style="font-size:13px;color:var(--dim);margin-bottom:14px;line-height:1.6">Remove a banned tool from all entries. Optionally force a specific replacement — otherwise the AI will choose the best fit.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+          <div>
+            <div style="font-size:11px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Tool to Remove <span style="color:#f87171">*</span></div>
+            <input id="surgeon-banned" class="inp" placeholder="e.g. Flip" style="margin-bottom:0">
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Force Replacement <span style="color:var(--dim)">(optional)</span></div>
+            <input id="surgeon-replacement" class="inp" placeholder="e.g. Padlet" style="margin-bottom:0">
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <button class="btn-pri" id="btn-surgeon" onclick="runSurgeon()">Run Surgeon →</button>
+          <span id="surgeon-status" style="font-size:13px;font-weight:600"></span>
+        </div>
+      </div>
+
+      <!-- Clean up "The twist" wording -->
+      <div class="card" style="margin-bottom:14px">
+        <span class="label">Clean up "The twist" wording</span>
+        <p style="font-size:13px;color:var(--dim);margin-bottom:14px;line-height:1.6">One-pass cleanup that removes any leftover "The twist:" wording from already-saved suggestions across every unit. No AI and no cost — safe to run more than once.</p>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <button class="btn-pri" id="btn-twist-sweep" onclick="runTwistSweep()">Clean up now →</button>
+          <span id="twist-sweep-status" style="font-size:13px;font-weight:600"></span>
+        </div>
+      </div>
+
+      <!-- Suggestion Quality Audit -->
+      <div class="card" style="margin-bottom:14px">
+        <span class="label">🔎 Audit Suggestions</span>
+        <p style="font-size:13px;color:var(--dim);margin-bottom:14px;line-height:1.6">Grades every stored suggestion for teacher-friendly, creative, achievable quality and rewrites the weak ones. Runs on the server — close the Studio anytime. The first run is a dry run (report only); run it again to auto-fix.</p>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <button class="btn-pri" id="btn-suggestion-audit" onclick="startSuggestionAudit()">Start audit</button>
+        </div>
+        <div id="suggestion-audit-panel" style="margin-top:10px"></div>
+      </div>
+
+      <!-- Side-by-side campus comparison -->
+      <div class="card">
+        <span class="label">Side-by-side campus comparison</span>
+        <p style="font-size:13px;color:var(--dim);margin-bottom:14px;line-height:1.6">Pick a unit theme to see how all three campuses' suggestions compare side by side.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+          <select id="compare-year" class="inp" style="width:160px;margin-bottom:0" onchange="updateCompareThemes()">
+            <option value="">All year levels</option>
+          </select>
+          <select id="compare-theme" class="inp" style="flex:1;min-width:200px;margin-bottom:0" onchange="renderComparison()">
+            <option value="">Select a theme…</option>
+          </select>
+        </div>
+        <div id="comparison-grid"></div>
+      </div>
+    </div>
+
+    <!-- LIVE ANALYTICS -->
+    <div id="panel-live" class="panel">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap">
+        <div class="page-title">Live Analytics</div>
+        <div id="live-dot" style="width:9px;height:9px;border-radius:50%;background:var(--lime);margin-left:4px"></div>
+        <button class="btn-sm" id="btn-refresh-live" onclick="loadLiveAnalytics()" style="margin-left:auto">↻ Refresh</button>
+      </div>
+      <div class="page-sub" id="live-last-updated">Loading from Google Sheets…</div>
+
+      <div id="live-loading" style="text-align:center;padding:60px;color:var(--dim)">
+        <div style="font-size:32px;margin-bottom:12px">◉</div>
+        <div style="font-size:14px;font-weight:600">Connecting to Google Sheets…</div>
+      </div>
+
+      <div id="live-content" style="display:none">
+
+        <!-- Sub-tabs -->
+        <div class="analytics-subtabs">
+          <button class="analytics-subtab active" data-subtab="overview"   onclick="setAnalyticsSubtab('overview')">Overview</button>
+          <button class="analytics-subtab"        data-subtab="adoption"   onclick="setAnalyticsSubtab('adoption')">Adoption</button>
+          <button class="analytics-subtab"        data-subtab="engagement" onclick="setAnalyticsSubtab('engagement')">Engagement</button>
+          <button class="analytics-subtab"        data-subtab="feedback"   onclick="setAnalyticsSubtab('feedback')">Feedback &amp; Audit</button>
+        </div>
+
+        <!-- ===================== OVERVIEW ===================== -->
+        <div class="analytics-subpanel" data-subpanel="overview" style="display:block">
+
+          <!-- Insights & suggested actions -->
+          <div class="card analytics-card insights-card" style="margin-bottom:14px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap">
+              <span class="label" style="margin:0;color:#A78BFA">💡 insights &amp; suggested actions</span>
+              <span id="live-insights-count" style="font-size:11px;color:var(--dim);font-weight:600;margin-left:auto"></span>
+              <button id="btn-ai-summary" class="btn-sm" onclick="generateAISummary()" style="color:#A78BFA;border-color:rgba(167,139,250,.4)">✨ AI exec summary</button>
+            </div>
+            <p class="card-hint">Heuristic cards below recompute on every refresh. Click <b>AI exec summary</b> for a one-paragraph narrative across all the data.</p>
+            <div id="live-ai-summary" style="display:none"></div>
+            <div id="live-insights"></div>
+          </div>
+
+          <!-- KPI strip -->
+          <div id="live-kpi-strip" class="kpi-strip"></div>
+
+          <!-- Growth over time -->
+          <div class="card analytics-card" style="margin-bottom:14px">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap">
+              <span class="label" style="margin:0">growth over time</span>
+              <div style="flex:1"></div>
+              <div style="display:flex;gap:6px" id="growth-bucket-filters">
+                <button class="btn-sm growth-bucket" data-bucket="day" onclick="setGrowthBucket('day')">Day</button>
+                <button class="btn-sm growth-bucket active" data-bucket="week" onclick="setGrowthBucket('week')">Week</button>
+                <button class="btn-sm growth-bucket" data-bucket="month" onclick="setGrowthBucket('month')">Month</button>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap" id="growth-campus-filters">
+              <button class="btn-sm growth-campus active" data-campus="all" onclick="setGrowthCampus('all')">All campuses</button>
+              <button class="btn-sm growth-campus" data-campus="Elsternwick" onclick="setGrowthCampus('Elsternwick')">Elsternwick</button>
+              <button class="btn-sm growth-campus" data-campus="Glen Waverley" onclick="setGrowthCampus('Glen Waverley')">Glen Waverley</button>
+              <button class="btn-sm growth-campus" data-campus="St Kilda Rd" onclick="setGrowthCampus('St Kilda Rd')">St Kilda Rd</button>
+            </div>
+            <p class="card-hint">Page views (blue) and tools marked as used (lime). Hover for exact counts.</p>
+            <div id="live-growth-trend" class="growth-trend"></div>
+            <div id="live-growth-empty" class="empty-msg" style="display:none"></div>
+            <div id="live-growth-chart" style="width:100%;height:280px"></div>
+          </div>
+
+          <!-- Weekly Scorecard -->
+          <div class="card analytics-card">
+            <span class="label">weekly scorecard</span>
+            <div id="live-scorecard"></div>
+          </div>
+
+        </div>
+
+        <!-- ===================== ADOPTION ===================== -->
+        <div class="analytics-subpanel" data-subpanel="adoption" style="display:none">
+
+          <!-- Reach matrix -->
+          <div class="card analytics-card" style="margin-bottom:14px">
+            <span class="label">reach — coverage by year level &amp; campus</span>
+            <p class="card-hint">Lit cells are teams that have logged at least one "I Used This". The number shows total uses by that team.</p>
+            <div id="live-reach-matrix"></div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+            <div class="card analytics-card">
+              <span class="label">views by campus</span>
+              <p class="card-hint">Total page views and average dwell time per campus.</p>
+              <div id="live-campus-chart"></div>
+            </div>
+            <div class="card analytics-card">
+              <span class="label">year-level coverage</span>
+              <p class="card-hint">Number of distinct campuses where each year level has logged use.</p>
+              <div id="live-year-coverage"></div>
+            </div>
+          </div>
+
+          <!-- Teams that clicked "I Used This" -->
+          <div class="card analytics-card">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+              <span class="label" style="margin:0">staff teams who clicked "I Used This"</span>
+              <div style="flex:1"></div>
+              <span id="live-used-by-team-count" style="font-size:11px;color:var(--dim);font-weight:600"></span>
+            </div>
+            <p class="card-hint">All-time count of confirmed uses per team (campus + year level). Source: Used sheet.</p>
+            <div id="live-used-by-team"></div>
+          </div>
+
+        </div>
+
+        <!-- ===================== ENGAGEMENT ===================== -->
+        <div class="analytics-subpanel" data-subpanel="engagement" style="display:none">
+
+          <!-- Engagement funnel -->
+          <div class="card analytics-card" style="margin-bottom:14px">
+            <span class="label">engagement funnel</span>
+            <p class="card-hint">Views → "I'm going to try this" → "I Used This". The drop-off shows where teachers stop engaging.</p>
+            <div id="live-funnel"></div>
+          </div>
+
+          <!-- In-page teacher actions -->
+          <div class="card analytics-card" style="margin-bottom:14px">
+            <span class="label">🖱️ in-page teacher actions</span>
+            <p class="card-hint">Clicks inside unit pages: tool picker, AI idea generations, Copilot helper, STEM reveals, feedback opens and unit-detail proposals. Collected since 7 Jul 2026.</p>
+            <div id="live-interactions"></div>
+          </div>
+
+          <!-- Tool Rankings -->
+          <div class="card analytics-card" style="margin-bottom:14px">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap">
+              <span class="label" style="margin:0">🏆 tool usage rankings</span>
+              <div style="flex:1"></div>
+              <div style="display:flex;gap:6px" id="ranking-filters">
+                <button class="btn-sm ranking-scope active" data-scope="all" onclick="setRankingScope('all')">All</button>
+                <button class="btn-sm ranking-scope" data-scope="Elsternwick" onclick="setRankingScope('Elsternwick')">EL</button>
+                <button class="btn-sm ranking-scope" data-scope="Glen Waverley" onclick="setRankingScope('Glen Waverley')">GW</button>
+                <button class="btn-sm ranking-scope" data-scope="St Kilda Rd" onclick="setRankingScope('St Kilda Rd')">STK</button>
+              </div>
+            </div>
+            <p class="card-hint">Most-used tools, plus tools that get suggested often but are rarely (or never) confirmed as used.</p>
+            <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:14px">
+              <div>
+                <div class="sub-label">Most used tools</div>
+                <div id="rankings-most-used-chart"></div>
+                <div id="rankings-most-used" style="display:none"></div>
+              </div>
+              <div>
+                <div class="sub-label">Dead suggestions</div>
+                <div id="rankings-dead" class="dead-list">Tools suggested often but never clicked as used.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card analytics-card" style="margin-bottom:14px">
+            <span class="label">top 10 viewed pages</span>
+            <p class="card-hint">Most-visited unit pages on the public DLA.</p>
+            <div id="live-top-pages"></div>
+          </div>
+
+          <!-- Recently used -->
+          <div class="card analytics-card">
+            <span class="label">tools marked as used by teachers</span>
+            <p class="card-hint">Latest 15 "I Used This" events across all campuses.</p>
+            <div id="live-used"></div>
+          </div>
+
+        </div>
+
+        <!-- ===================== FEEDBACK &amp; AUDIT ===================== -->
+        <div class="analytics-subpanel" data-subpanel="feedback" style="display:none">
+
+          <!-- Teacher feedback -->
+          <div class="card analytics-card" style="margin-bottom:14px">
+            <span class="label">teacher feedback</span>
+            <p class="card-hint">Latest 20 free-text feedback submissions from teachers.</p>
+            <div id="live-feedback" style="max-height:480px;overflow-y:auto"></div>
+          </div>
+
+          <!-- Click audit — every individual Used row -->
+          <div class="card analytics-card">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap">
+              <span class="label" style="margin:0">click audit — every "I Used This" row</span>
+              <div style="flex:1"></div>
+              <span id="live-used-audit-count" style="font-size:11px;color:var(--dim);font-weight:600"></span>
+            </div>
+            <p class="card-hint">Raw rows from the Used sheet, newest first. Use this to track down where a leaderboard count came from.</p>
+            <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap" id="audit-campus-filters">
+              <button class="btn-sm audit-campus active" data-campus="all" onclick="setAuditCampus('all')">All campuses</button>
+              <button class="btn-sm audit-campus" data-campus="Elsternwick" onclick="setAuditCampus('Elsternwick')">Elsternwick</button>
+              <button class="btn-sm audit-campus" data-campus="Glen Waverley" onclick="setAuditCampus('Glen Waverley')">Glen Waverley</button>
+              <button class="btn-sm audit-campus" data-campus="St Kilda Rd" onclick="setAuditCampus('St Kilda Rd')">St Kilda Rd</button>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;align-items:center">
+              <select id="audit-year-filter" onchange="setAuditYear(this.value)" style="background:var(--card2);border:1px solid #333;color:var(--text);padding:5px 8px;border-radius:6px;font-size:12px;font-family:inherit">
+                <option value="all">All year levels</option>
+              </select>
+              <input type="search" id="audit-search" oninput="setAuditSearch(this.value)" placeholder="Search theme, tool, phase…" style="flex:1;min-width:160px;background:var(--card2);border:1px solid #333;color:var(--text);padding:5px 10px;border-radius:6px;font-size:12px;font-family:inherit">
+            </div>
+            <div id="live-used-audit" style="max-height:480px;overflow-y:auto"></div>
+          </div>
+
+        </div>
+
+        <!-- Hidden placeholder kept so older heatmap render calls remain harmless -->
+        <div id="live-heatmap" style="display:none"></div>
+        <div id="live-overview-grid" style="display:none"></div>
+
+      </div>
+    </div>
+
+    <!-- LIBRARIES -->
+    <div id="panel-libraries" class="panel">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap">
+        <h1 class="page-title" style="margin:0">Lesson Libraries</h1>
+        <div style="flex:1"></div>
+        <button class="btn-sm" onclick="pullLibrariesFromGitHub()" title="Pull libraries.json from GitHub Pages and overwrite Drive (use if you edited GitHub directly)" style="color:var(--gold);border-color:var(--gold)">⬇ Pull from GitHub</button>
+        <button class="btn-sm" onclick="refreshLibrariesFromDrive()" title="Reload libraries.json from Drive (discards local cache)">↻ Refresh from Drive</button>
+      </div>
+      <p class="page-sub">Curate the lesson libraries that Bulk AI Edit references when proposing changes. Only lessons in these libraries will be suggested — this prevents hallucinations.</p>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+        <button class="btn-pri" onclick="showAddLibraryDialog()" style="font-size:13px;padding:10px 18px">+ Add Library</button>
+        <button class="btn-sm" onclick="libExportAll()">↓ Export All</button>
+        <button class="btn-sm" onclick="libImportAllTrigger()">↑ Import</button>
+        <input type="file" id="lib-import-all" accept=".json" style="display:none" onchange="libImportAll(event)">
+      </div>
+
+      <div id="lib-sections"></div>
+    </div>
+
+    <!-- ENTRY DETAIL -->
+    <div id="panel-entry" class="panel">
+      <button class="back-btn" onclick="closeEntry()">← Back</button>
+      <div id="entry-header" class="card" style="margin-bottom:16px"></div>
+      <div id="entry-sugs"></div>
+      <div class="card">
+        <span class="label">Regenerate all 5 with AI</span>
+        <button class="btn-pri" id="btn-regen-all" onclick="regenAll()">Generate 6 new suggestions</button>
+        <div id="regen-all-result" style="margin-top:12px"></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap">
+          <span class="label" style="margin-bottom:0">Realism & age scan</span>
+          <button class="btn-sm" id="btn-entry-realism-scan" onclick="scanCurrentEntryRealism()" style="color:var(--lime);border-color:var(--lime)">Scan this entry</button>
+        </div>
+        <p style="font-size:12px;color:var(--dim);margin-bottom:10px">Checks whether each suggestion is practical for a teacher to run, age-appropriate, and connected to the tool's real classroom affordances.</p>
+        <div id="entry-realism-result"></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+          <span class="label" style="margin-bottom:0">Quality score</span>
+          <button class="btn-sm" id="btn-score-quality" onclick="scoreEntryQuality()">Score with AI</button>
+        </div>
+        <p style="font-size:12px;color:var(--dim);margin-bottom:10px">Rates each suggestion as Generic / Good / Excellent based on how specifically it connects to this unit's content.</p>
+        <div id="quality-score-result"></div>
+      </div>
+    </div>
+
+  </div><!-- end app-content -->
+</div><!-- end main -->
+
+<!-- ?v=APP_VERSION cache-busts the code files. Bump this to match APP_VERSION
+     in js/00-config-state-utils.js on every deploy so browsers fetch fresh code. -->
+<script src="js/00-config-state-utils.js?v=5.55"></script>
+<script src="js/01-inventory-helpers.js?v=5.55"></script>
+<script src="js/02-ui-load-navigation.js?v=5.55"></script>
+<script src="js/04-audit-analytics-live.js?v=5.55"></script>
+<script src="js/05-bulk-setup-libraries.js?v=5.55"></script>
+<script src="js/06-bulk-router-chat.js?v=5.55"></script>
+<script src="js/07-bulk-actions.js?v=5.55"></script>
+<script src="js/09-legacy-restored.js?v=5.55"></script>
+<script src="js/08-export-sync-hotfixes.js?v=5.55"></script>
+</body>
+</html>
+
+<script>/* ===== DLA sandbox studio shim ===== */
+/* DLA Studio sandbox shim. Appended after all nine js/ files so its overrides win.
+ *
+ * Page globals it leans on (all verified in the real Studio):
+ *   ingest(arr, skipCache)      js/02-ui-load-navigation.js:203  — sets DATA, rebuilds filters
+ *   showApp()                   js/02:16                          — reveals #app-content
+ *   loadLiveAnalytics()         js/09-legacy-restored.js:1199     — the single analytics entry
+ *   DRIVE_TOKEN / DRIVE_FILE_ID js/00:37,39  — `let`, so assignable by bare name
+ *   DATA                        js/00:1      — `let`, lexical, NOT window.DATA
+ *
+ * The functions we override (readMultipleRanges, readSheetRange,
+ * getAnalyticsSheetTz) are plain function declarations, so they DO live on
+ * window and can be reassigned from here.
+ */
+(function () {
+  var BADGE_TEXT = 'Sandbox demo — not live data';
+  var SAMPLE_TEXT = 'Sample data — demonstration only';
+  var OFF_NOTE = 'Turned off in this demo';
+
+  var ANALYTICS = null;
+
+  // ---- 1. Timestamps -----------------------------------------------------
+  // Sample rows carry "@-<days>d<HH>:<MM>" instead of a baked date, so the
+  // dashboard's rolling 7/14/30-day windows always contain data no matter when
+  // the demo is opened. Resolve them against today at load time.
+  var SENTINEL = /^@-(\d+)d(\d{2}):(\d{2})$/;
+  function resolveStamp(value) {
+    var m = SENTINEL.exec(String(value));
+    if (!m) return value;
+    var d = new Date();
+    d.setDate(d.getDate() - Number(m[1]));
+    d.setHours(Number(m[2]), Number(m[3]), 0, 0);
+    return d.toISOString();
+  }
+  function resolveRows(rows) {
+    return (rows || []).map(function (row, i) {
+      if (i === 0 || !Array.isArray(row)) return row;   // header
+      return row.map(function (cell) { return resolveStamp(cell); });
+    });
+  }
+
+  // ---- 2. Fake session ---------------------------------------------------
+  // Every Drive/backend path is gated on `if(!DRIVE_TOKEN) return`. Give it a
+  // sentinel so the UI behaves as signed in. Nothing can actually go out: the
+  // guard blocks all cross-origin requests.
+  try { DRIVE_TOKEN = 'sandbox-demo-token'; } catch (e) {}
+  try { DRIVE_FILE_ID = 'sandbox-demo-file'; } catch (e) {}
+  try { CURRENT_USER_EMAIL = 'demo@wesleycollege.edu.au'; } catch (e) {}
+
+  // js/08's init waits forever for window.google.accounts before its silent
+  // re-auth. Satisfy the wait with a stub that never prompts, so the poll stops.
+  window.google = window.google || {};
+  window.google.accounts = window.google.accounts || {
+    oauth2: {
+      initTokenClient: function () {
+        return { requestAccessToken: function () { /* sandbox: no sign-in */ } };
+      }
+    },
+    id: { initialize: function () {}, prompt: function () {}, renderButton: function () {} }
+  };
+
+  // ---- 3. Analytics: read from the local sample file, never Sheets --------
+  window.getAnalyticsSheetTz = function () { return Promise.resolve('Australia/Melbourne'); };
+  window.readSheetRange = function (range) {
+    return Promise.resolve(ANALYTICS && ANALYTICS[range] ? ANALYTICS[range] : []);
+  };
+  window.readMultipleRanges = function (ranges) {
+    return Promise.resolve((ranges || []).map(function (r) {
+      return ANALYTICS && ANALYTICS[r] ? ANALYTICS[r] : [];
+    }));
+  };
+
+  // ---- 4. Styles ---------------------------------------------------------
+  function addStyles() {
+    var css = document.createElement('style');
+    css.textContent =
+      '#sandboxBadge{position:fixed;left:12px;bottom:12px;z-index:99999;background:#1b1b1f;color:#fff;' +
+      'font:600 12px/1.3 system-ui,-apple-system,Segoe UI,sans-serif;padding:8px 12px;border-radius:999px;' +
+      'box-shadow:0 2px 10px rgba(0,0,0,.35);pointer-events:none;opacity:.92}' +
+      '.sandbox-sample-note{display:block;margin:0 0 14px;padding:8px 14px;border-radius:8px;' +
+      'background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.45);color:#fbbf24;' +
+      'font:700 12px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;letter-spacing:.02em}' +
+      '.sandbox-off{opacity:.45;cursor:not-allowed!important;position:relative}' +
+      '.sandbox-off-note{font-size:11px;color:#888;margin-left:8px;font-weight:600}' +
+      // Tool Inventory whitelist fills the content width. It lives in
+      // #panel-tools as #inv-whitelist-pills, inside a two-column grid that
+      // pins it to a ~531px column. Collapse that grid to one column so the
+      // pills run the full width and the neighbouring block stacks underneath.
+      '#panel-tools div:has(> div > #inv-whitelist-pills){grid-template-columns:1fr!important}' +
+      '#panel-tools div:has(> #inv-whitelist-pills){grid-column:1/-1!important;width:100%}' +
+      '#inv-whitelist-pills{display:flex;flex-wrap:wrap;gap:8px;width:100%;max-width:none!important}' +
+      '#inv-whitelist-pills > *{flex:0 0 auto}';
+    document.head.appendChild(css);
+  }
+
+  function addBadge() {
+    if (document.getElementById('sandboxBadge')) return;
+    var el = document.createElement('div');
+    el.id = 'sandboxBadge';
+    el.textContent = BADGE_TEXT;
+    document.body.appendChild(el);
+  }
+
+  // ---- 5. Removals, disabling and honesty labels -------------------------
+  // Controls that generate, save, sync or push. Everything stays visible so the
+  // audience can see the capability; nothing is clickable.
+  var WRITE_CONTROL_IDS = [
+    'btn-drive', 'btn-seed-kinder', 'btn-add-queue', 'btn-bulk-reset', 'btn-bulk-voice',
+    'btn-bulk-chat-send', 'btn-full-realism-audit', 'btn-surgeon', 'btn-refresh-live',
+    'btn-ai-summary', 'btn-regen-all', 'btn-entry-realism-scan', 'btn-score-quality'
+  ];
+  var WRITE_ONCLICK = /loadFromDrive|seedKinderYearGroups|addToGASQueue|runSurgeon|runTwistSweep|startSuggestionAudit|regenAll|generateAISummary|loadLiveAnalytics|createManualSnapshot|savePlaybookFromChat|pullLibrariesFromGitHub|refreshLibrariesFromDrive|showAddLibraryDialog|libImportAllTrigger|clearSession|forceLatestVersion|showBackendScreen|runFullRealismAudit|scanCurrentEntryRealism|scoreEntryQuality|bulkChatSend|bulkChatReset|toggleBulkVoice|inspireAll|rebootMakerspace|runBulk|Surgeon/i;
+
+  // Sections Nathan asked to remove, keyed by a button inside the card.
+  var REMOVE_CARD_BY_BTN_ID = ['btn-twist-sweep', 'btn-suggestion-audit'];
+  // Controls created at runtime, so matched by their visible label.
+  var REMOVE_BY_TEXT = [/inspire all/i, /sweep app smash/i, /makerspace/i];
+
+  function disable(el) {
+    if (!el || el.dataset.sandboxOff) return;
+    el.dataset.sandboxOff = '1';
+    el.classList.add('sandbox-off');
+    el.setAttribute('aria-disabled', 'true');
+    el.removeAttribute('onclick');
+    el.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); }, true);
+    if (el.tagName === 'BUTTON' || el.tagName === 'INPUT') el.disabled = true;
+    if (!el.parentNode || el.parentNode.querySelector('.sandbox-off-note')) return;
+    var note = document.createElement('span');
+    note.className = 'sandbox-off-note';
+    note.textContent = OFF_NOTE;
+    el.insertAdjacentElement('afterend', note);
+  }
+
+  function sweep() {
+    // a. remove the two named Bulk cards
+    REMOVE_CARD_BY_BTN_ID.forEach(function (id) {
+      var btn = document.getElementById(id);
+      if (!btn) return;
+      var card = btn.closest ? btn.closest('.card') : null;
+      (card || btn).remove();
+    });
+
+    // b. remove runtime-created controls by label, plus their card when it is
+    //    left with nothing else to do
+    var clickable = document.querySelectorAll('button, a.btn, .btn, .btn-pri, .btn-sec');
+    Array.prototype.forEach.call(clickable, function (el) {
+      var label = (el.textContent || '').trim();
+      if (!label) return;
+      if (REMOVE_BY_TEXT.some(function (re) { return re.test(label); })) {
+        var card = el.closest ? el.closest('.card') : null;
+        if (card && card.querySelectorAll('button, .btn, .btn-pri').length <= 1) card.remove();
+        else el.remove();
+      }
+    });
+
+    // b2. some of these are not controls at all — the Makerspace reboot shows up
+    //     on Browse as a plain status line ("126/127 projects rebooted"). Remove
+    //     the whole card it sits in.
+    var blocks = document.querySelectorAll('.card, .card2');
+    Array.prototype.forEach.call(blocks, function (el) {
+      var text = (el.textContent || '');
+      if (!text) return;
+      if (REMOVE_BY_TEXT.some(function (re) { return re.test(text); })) {
+        var card = el.closest ? (el.closest('.card') || el) : el;
+        card.remove();
+      }
+    });
+
+    // b3. Kinder is gone from the demo corpus, but the year-level pickers are
+    //     built from a hardcoded list, not from DATA. Strip it there too so no
+    //     screen offers a year group that no longer exists.
+    var opts = document.querySelectorAll('option');
+    Array.prototype.forEach.call(opts, function (o) {
+      if (/kinder/i.test(o.textContent || '') || /kinder/i.test(o.value || '')) o.remove();
+    });
+    var labels = document.querySelectorAll('label, .pill, .chip, .age-range, [data-year]');
+    Array.prototype.forEach.call(labels, function (el) {
+      var t = (el.textContent || '').trim();
+      if (/^\s*\d\s*year\s*old\s*kinder\s*$/i.test(t)) el.remove();
+    });
+
+    // c. disable every remaining write control
+    WRITE_CONTROL_IDS.forEach(function (id) { disable(document.getElementById(id)); });
+    var all = document.querySelectorAll('button, input[type=submit]');
+    Array.prototype.forEach.call(all, function (el) {
+      var oc = el.getAttribute('onclick') || '';
+      if (oc && WRITE_ONCLICK.test(oc)) disable(el);
+    });
+
+    // d. sample-data label at the top of each numbers panel. Only the outermost
+    //    host per panel — live-content sits inside panel-live, and labelling
+    //    both stacks two identical banners.
+    ['panel-live', 'panel-dashboard'].forEach(function (id) {
+      var host = document.getElementById(id);
+      if (!host || host.querySelector('.sandbox-sample-note')) return;
+      var note = document.createElement('div');
+      note.className = 'sandbox-sample-note';
+      note.textContent = SAMPLE_TEXT;
+      host.insertBefore(note, host.firstChild);
+    });
+  }
+
+  // ---- 6. Charts on hidden tabs -----------------------------------------
+  // loadLiveAnalytics() runs while the Analytics panel is still hidden, so
+  // ECharts measures its containers at 0px and draws nothing. Re-measure after
+  // any tab switch, once the panel actually has a size.
+  function resizeCharts() {
+    if (!window.echarts || !echarts.getInstanceByDom) return;
+    var candidates = document.querySelectorAll('[id^="live-"], .chart, [class*="chart"]');
+    Array.prototype.forEach.call(candidates, function (el) {
+      try {
+        var inst = echarts.getInstanceByDom(el);
+        if (inst) inst.resize();
+      } catch (e) { /* not a chart host */ }
+    });
+  }
+
+  // Both levels of navigation hide their panels with display:none, so a chart
+  // can be laid out at 0px twice over: once for the tab, once for the
+  // Analytics sub-tab (.analytics-subpanel, driven by setAnalyticsSubtab).
+  function afterNav() {
+    setTimeout(function () { sweep(); resizeCharts(); }, 60);
+    setTimeout(resizeCharts, 260);
+    setTimeout(resizeCharts, 700);
+  }
+  ['switchTab', 'setAnalyticsSubtab'].forEach(function (name) {
+    var real = window[name];
+    if (typeof real !== 'function') return;
+    window[name] = function () {
+      var result = real.apply(this, arguments);
+      afterNav();
+      return result;
+    };
+  });
+  window.addEventListener('resize', function () { setTimeout(resizeCharts, 120); });
+
+  // ---- 7. Boot -----------------------------------------------------------
+  function boot() {
+    addStyles();
+    addBadge();
+
+    Promise.all([
+      fetch('studio-data.json', { cache: 'no-store' }).then(function (r) { return r.json(); }),
+      fetch('studio-analytics.json', { cache: 'no-store' }).then(function (r) { return r.json(); }),
+      fetch('libraries.json', { cache: 'no-store' }).then(function (r) { return r.json(); })
+    ]).then(function (both) {
+      var units = both[0];
+      var raw = both[1];
+      var libs = both[2];
+
+      // The Tool Inventory normally arrives with libraries.json from Drive.
+      // Without this the whitelist shows a single seeded entry instead of the
+      // real approved list.
+      try {
+        if (typeof loadToolInventoryFromMeta === 'function' && libs && libs._meta) {
+          loadToolInventoryFromMeta(libs._meta);
+          if (typeof LIBRARIES !== 'undefined') LIBRARIES = libs;
+          if (typeof renderToolInventory === 'function') renderToolInventory();
+        }
+      } catch (e) {
+        if (window.console) console.warn('[sandbox] tool inventory seed failed:', e && e.message);
+      }
+      ANALYTICS = {};
+      Object.keys(raw).forEach(function (range) { ANALYTICS[range] = resolveRows(raw[range]); });
+
+      ingest(units, true);
+      showApp();
+      sweep();
+
+      if (typeof loadLiveAnalytics === 'function') {
+        loadLiveAnalytics().catch(function (e) {
+          if (window.console) console.warn('[sandbox] analytics render issue:', e && e.message);
+        });
+      }
+
+      // Tabs render lazily, so keep sweeping as panels appear.
+      new MutationObserver(function () { sweep(); })
+        .observe(document.body, { childList: true, subtree: true });
+    }).catch(function (err) {
+      if (window.console) console.error('[sandbox] studio boot failed:', err);
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+
+</script>
