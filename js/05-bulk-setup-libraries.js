@@ -177,17 +177,17 @@ const TOOL_AFFORDANCE_NOTES = {
   // realWorld only: is/good/avoid live in the curator-saved override in libraries.json
   // (_meta._toolAffordances['teachable machine']); getToolAffordance_ merges per-field.
   'teachable machine': {
-    realWorld: 'In 1-2 sentences woven into the description, connect THIS specific classification task to a real-world system that works the same way — choose the parallel that genuinely matches the activity, never a generic list. True examples to draw from: recognising uniforms/vehicles/helpers → image recognition in council CCTV and emergency-dispatch systems; sorting recycling/materials → camera-driven sorting arms in recycling facilities; identifying plants/animals/leaves → wildlife-monitoring cameras and apps like Seek/iNaturalist; recognising faces/poses/movements → face unlock, accessibility tools, physiotherapy and sports-coaching apps; sorting food/produce → fruit-grading machines on farms; recognising sounds/voice commands → smart speakers and hearing-assistance tech.'
+    realWorld: 'In 1-2 sentences woven into the description, connect THIS specific classification task to a real-world system that works the same way. Choose the parallel that genuinely matches the activity, never a generic list. True examples to draw from: recognising uniforms/vehicles/helpers -> image recognition in council CCTV and emergency-dispatch systems; sorting recycling/materials -> camera-driven sorting arms in recycling facilities; identifying plants/animals/leaves -> wildlife-monitoring cameras and apps like Seek/iNaturalist; recognising faces/poses/movements -> face unlock, accessibility tools, physiotherapy and sports-coaching apps; sorting food/produce -> fruit-grading machines on farms; recognising sounds/voice commands -> smart speakers and hearing-assistance tech.'
   },
   tinkercad: {
     is: 'a 3D design app for modelling solid objects that can be 3D-printed in plastic',
-    good: 'designing and modelling a 3D object or prototype to 3D-print — e.g. a container, holder, tool, model, badge, replacement part or simple moving mechanism — iterating the shape and measurements in the editor',
-    avoid: 'do NOT use Tinkercad to simulate, test or compare MATERIAL PROPERTIES such as strength, flexibility, weight, recyclability or the sustainability of plastic vs metal vs wood — it only designs shapes in plastic and cannot simulate materials. Do NOT frame it as electronics, circuits or block-coding.'
+    good: 'designing and modelling a 3D object or prototype to 3D-print, e.g. a container, holder, tool, model, badge, replacement part or simple moving mechanism, iterating the shape and measurements in the editor',
+    avoid: 'do NOT use Tinkercad to simulate, test or compare MATERIAL PROPERTIES such as strength, flexibility, weight, recyclability or the sustainability of plastic vs metal vs wood. It only designs shapes in plastic and cannot simulate materials. Do NOT frame it as electronics, circuits or block-coding.'
   },
   '3d printers': {
     is: 'a machine that prints a physical plastic object from a 3D model students have designed',
     good: 'printing a student-designed 3D model or prototype (usually designed in Tinkercad) and refining it after a test print',
-    avoid: 'it only prints the shape students design, in plastic — do NOT use it to compare or test material properties.'
+    avoid: 'it only prints the shape students design, in plastic. Do NOT use it to compare or test material properties.'
   },
   'adobe express': {
     is: 'a quick graphic-design and short-video app for posters, infographics, flyers, simple web pages and clips',
@@ -206,7 +206,7 @@ const TOOL_AFFORDANCE_NOTES = {
   beebots: {
     is: 'a simple floor robot for early-years directional and sequence coding on a mat',
     good: 'Prep to Year 2 students programming a sequence of moves to navigate a mat or map',
-    avoid: 'Beebots have no sensors and no screen — not for data collection or older-year abstract coding.'
+    avoid: 'Beebots have no sensors and no screen, so not for data collection or older-year abstract coding.'
   },
   'book creator': {
     is: 'a tool for making multimodal digital books with text, images, audio and video',
@@ -229,12 +229,12 @@ const TOOL_AFFORDANCE_NOTES = {
   clickview: {
     is: 'an educational video library for watching and analysing curated clips',
     good: 'watching and responding to a relevant educational video, sometimes with built-in questions',
-    avoid: 'it is for watching video, not making it — to create video use iMovie, Apple Clips or Stop Motion Studio.'
+    avoid: 'it is for watching video, not making it. To create video use iMovie, Apple Clips or Stop Motion Studio.'
   },
   delightex: {
     is: 'a 3D and VR scene-building platform (formerly CoSpaces Edu) where students build virtual worlds and code them with blocks (CoBlocks)',
-    good: 'building an interactive 3D or VR scene, virtual tour or simple game, and coding how objects move and respond',
-    avoid: 'it builds virtual on-screen 3D/VR scenes — not physical making or 3D printing (use Tinkercad or the 3D Printers for that).'
+    good: 'building an interactive 3D or VR scene, virtual tour or simple game, and coding how objects move and respond, including building in Merge Cube mode so the finished scene can be viewed on a Merge Cube',
+    avoid: 'it builds virtual on-screen 3D/VR scenes, not physical making or 3D printing (use Tinkercad or the 3D Printers for that).'
   },
   epic: {
     is: 'a childrens digital library of ebooks and audiobooks',
@@ -248,7 +248,7 @@ const TOOL_AFFORDANCE_NOTES = {
   'field guide to victoria': {
     is: 'a Museums Victoria app for identifying local Victorian animals and species',
     good: 'identifying and researching local Victorian fauna in biodiversity, habitat or local-environment units',
-    avoid: 'its content is specific to Victoria — not for species elsewhere.'
+    avoid: 'its content is specific to Victoria, not for species elsewhere.'
   },
   freeform: {
     is: 'an infinite collaborative whiteboard or canvas',
@@ -276,31 +276,31 @@ const TOOL_AFFORDANCE_NOTES = {
   'insta360 camera': {
     is: 'a 360-degree camera that captures immersive spherical photos and video',
     good: 'capturing a 360-degree view of a space or process, or making a virtual tour',
-    avoid: 'for an ordinary photo or video a normal camera is better — use it when the whole surroundings matter.'
+    avoid: 'for an ordinary photo or video a normal camera is better. Use it when the whole surroundings matter.'
   },
   kahoot: {
     is: 'a game-based quiz tool',
     good: 'a student-made quiz to teach or revise content, or a quick formative check',
-    avoid: 'it is short question-and-answer — not a tool for deep creation.'
+    avoid: 'it is short question-and-answer, not a tool for deep creation.'
   },
   'lego spike prime': {
-    is: 'a build-and-code kit for motorised models with motors and sensors',
-    good: 'building, coding and testing a working model that addresses a real system, force or automation problem',
-    avoid: 'describe a real build, code and test — not a metaphor; it must physically do something.'
+    is: 'a build-and-code robotics kit with motors and sensors, programmed in the LEGO SPIKE app',
+    good: 'students designing and building their own working model, then coding its motors and sensors to solve a real problem, and testing and improving it',
+    avoid: 'Wesley has the base and expansion sets. The only sensors are colour, distance and force, plus tilt and movement in the hub. There is NO camera, NO microphone, NO thermometer, NO humidity, moisture or gas sensor and NO GPS. Never name a sensor the kit does not have, and never use the kit as a metaphor: the model must physically build, run and do something.'
   },
   'makey makey': {
     is: 'an invention kit that turns everyday conductive objects into keyboard or controller inputs',
     good: 'interactive posters, instruments or controllers triggered by touching conductive materials'
   },
   'merge cubes': {
-    is: 'a foam cube that shows interactive 3D and AR holograms when viewed through a compatible app',
-    good: 'holding and exploring a 3D object in augmented reality, such as anatomy, planets or artefacts',
-    avoid: 'needs the AR app and a real 3D-object purpose — not a standalone novelty.'
+    is: 'a foam cube that acts as a marker, so a 3D scene students have built in Delightex appears to sit in their hands when they point an iPad camera at it',
+    good: 'students building their own 3D scene in Delightex Merge Cube mode, then holding the cube to view, turn and present it. The six faces are the point: give each face a different member of a set students compare or sequence, such as a different natural hazard, habitat, body system, historical scene or stage of a process, so that turning the cube in their hands is what does the teaching',
+    avoid: 'Wesley does not have the paid Merge EDU library, so there are no ready-made anatomy, planet, fossil or Dig! objects to explore. Anything on the cube must be something students built themselves in Delightex. The cube has no screen, no electronics and no sensors: it does nothing on its own and needs an iPad camera pointed at it.'
   },
   'micro:bit': {
-    is: 'a pocket programmable board with sensors — accelerometer, light, temperature, compass, radio, buttons and an LED grid',
-    good: 'coding a sensor-based device, data logger or paired-device alert and testing it',
-    avoid: 'name the actual sensors or inputs used, not just "a device".'
+    is: 'a pocket-sized programmable board with a 5x5 red LED grid, two buttons, and built-in sensing for movement and tilt, compass direction, light level and rough temperature, plus a radio link to other micro:bits',
+    good: 'coding a sensor-based device, data logger, game or paired-device alert, wiring it to a buzzer, light or foil switch with crocodile clips, running it on a battery pack away from the computer, and testing it',
+    avoid: 'Wesley has the original V1 boards. They have NO microphone, NO speaker and NO touch-sensitive logo, so no lesson may depend on the board hearing or playing sound by itself. Sound needs a buzzer or headphones wired up with crocodile clips. There is also NO camera, NO GPS and NO humidity, moisture or air-quality sensor. The temperature reading comes from the chip and is only roughly room temperature, so never present it as a precise thermometer.'
   },
   'microsoft excel': {
     is: 'a spreadsheet for collecting, charting and analysing data',
@@ -337,7 +337,7 @@ const TOOL_AFFORDANCE_NOTES = {
   'podcast equipment': {
     is: 'physical microphones and recorders for capturing audio',
     good: 'only when a hands-on hardware recording setup is specifically intended',
-    avoid: 'for almost all podcasts and audio stories use "Podcasting using Canva" instead — it works on iPads and is the preferred school platform.'
+    avoid: 'for almost all podcasts and audio stories use "Podcasting using Canva" instead. It works on iPads and is the preferred school platform.'
   },
   'podcasting using canva': {
     is: 'the preferred school podcasting platform, which works on iPads',
@@ -374,16 +374,17 @@ const TOOL_AFFORDANCE_NOTES = {
   'slow motion physical analysis': {
     is: 'a technique of filming an action in slow motion to analyse movement, technique or forces',
     good: 'recording and slowing down a movement, such as a sport skill or a physical process, to observe and analyse it',
-    avoid: 'have a clear analytical question — not just a slow-motion video for effect.'
+    avoid: 'have a clear analytical question, not just a slow-motion video for effect.'
   },
   'sphero bolt': {
-    is: 'a programmable robot ball with sensors and a programmable LED matrix, using block and text coding',
-    good: 'coding Sphero to navigate, map routes, draw paths or collect sensor data'
+    is: 'a programmable robot ball with an 8x8 light grid, coded with blocks or text in the Sphero Edu app on an iPad',
+    good: 'coding BOLT to drive a route, navigate a course or maze, draw a shape or path, react to light levels, and show messages or simple animations on its light grid',
+    avoid: 'Wesley has the original BOLT. It can sense light level, tilt, speed and direction, and it can send infrared messages to another BOLT. It has NO camera, NO microphone, NO thermometer, NO colour sensor, NO distance sensor and NO GPS, and it cannot detect magnets or test which materials are magnetic. Do not mention its compass at all. Never name a sensor or feature that is not in this list.'
   },
   'sphero indi': {
-    is: 'a screenless early-years robot car driven by coloured tiles to teach cause-and-effect coding',
-    good: 'Prep to Year 2 sequencing and navigation using colour tiles, with no screen needed',
-    avoid: 'not for advanced coding or data — that is Sphero BOLT.'
+    is: 'a screenless early-years robot car that drives along a path of coloured tiles placed on the floor',
+    good: 'Prep to Year 2 students sequencing a route and exploring cause and effect by laying out coloured tiles, with no iPad or app needed',
+    avoid: 'Wesley uses Indi with the colour tiles only, no app and no screen. Do not give it block or text coding, sensors, data collection or graphing, and do not use it above Year 2. For older students coding a robot, use Sphero BOLT.'
   },
   'stop motion studio': {
     is: 'a frame-by-frame stop-motion animation app',
@@ -396,13 +397,13 @@ const TOOL_AFFORDANCE_NOTES = {
   },
   'wise discussion chatbots': {
     is: 'a Schoolbox "AI-guided Student Discussions" activity, added to a class page, where students have a structured written conversation with an AI agent that the teacher sets up and stays in control of (rules, timing, helpfulness level and support)',
-    good: 'introducing a topic, supporting inquiry, and guiding reflection and deeper critical thinking through one of four scenarios — Character Interview (role-play a historical figure, character or scientist to explore perspective), Socratic Tutor (open-ended questions that lead students to their own understanding), Self-Reflection (reflect on learning, strengths, challenges and goals), or Project Ideation (brainstorm and explore ideas for a project or design)',
+    good: 'introducing a topic, supporting inquiry, and guiding reflection and deeper critical thinking through one of four scenarios: Character Interview (role-play a historical figure, character or scientist to explore perspective), Socratic Tutor (open-ended questions that lead students to their own understanding), Self-Reflection (reflect on learning, strengths, challenges and goals), or Project Ideation (brainstorm and explore ideas for a project or design)',
     avoid: 'it is a teacher-guided thinking and discussion activity, not a fact-checked research source or a tool for producing a finished artefact.'
   },
   'word clouds abcya': {
     is: 'a tool that turns text into a word cloud where more frequent words appear larger',
     good: 'visualising the key words or themes in a text or brainstorm, then discussing what the big words show',
-    avoid: 'a quick visualisation — pair it with analysis, not a final product on its own.'
+    avoid: 'a quick visualisation. Pair it with analysis, not a final product on its own.'
   }
 };
 
@@ -1599,6 +1600,30 @@ function getLibraryLessons(key){ return LIBRARIES[key] || []; }
 // Pushes the Studio's approved/banned lists to GAS Script Properties
 // so the auditor, surgeon, and all GAS-side AI calls use the same lists.
 // Called automatically every time saveLibraries() succeeds.
+// Merged per-tool affordance notes for the approved list, keyed by lowercase
+// tool name. Sent to the backend by syncToolInventoryToGAS_ so the server builds
+// its prompts from the SAME notes the Studio shows, instead of its own hardcoded
+// copy that silently drifted (Tinkercad circuits, 2026-08-07).
+function buildToolNotesForSync_(){
+  const out = {};
+  const tools = (typeof TOOL_INVENTORY !== 'undefined' && Array.isArray(TOOL_INVENTORY.approved)) ? TOOL_INVENTORY.approved : [];
+  for(const t of tools){
+    const name = String(t && t.n ? t.n : t || '').trim();
+    if(!name) continue;
+    let a = null;
+    try { a = (typeof getToolAffordance_ === 'function') ? getToolAffordance_(name) : null; } catch(e){ a = null; }
+    if(!a && typeof TOOL_AFFORDANCE_NOTES === 'object' && TOOL_AFFORDANCE_NOTES) a = TOOL_AFFORDANCE_NOTES[name.toLowerCase().trim()];
+    if(!a) continue;
+    const entry = {};
+    if(a.is) entry.is = a.is;
+    if(a.good) entry.good = a.good;
+    if(a.avoid) entry.avoid = a.avoid;
+    if(a.realWorld) entry.realWorld = a.realWorld;
+    if(Object.keys(entry).length) out[name.toLowerCase().trim()] = entry;
+  }
+  return out;
+}
+
 async function syncToolInventoryToGAS_() {
   if (!SCRIPT_URL) return;
   normaliseToolInventory();
@@ -1606,7 +1631,12 @@ async function syncToolInventoryToGAS_() {
     action: 'syncToolInventory',
     approved: TOOL_INVENTORY.approved || [],
     banned: TOOL_INVENTORY.banned || [],
-    ageRanges: TOOL_INVENTORY.ageRanges || {}
+    ageRanges: TOOL_INVENTORY.ageRanges || {},
+    // 2026-08-07: the per-tool notes now travel with the list. They used to live
+    // ONLY here, so a rule like "Tinkercad is not for circuits" never reached the
+    // server -- which is the side that actually writes the lesson ideas. One copy,
+    // edited in Tool Inventory, used by both.
+    notes: buildToolNotesForSync_()
   });
   try {
     const r = await fetch(SCRIPT_URL, {
